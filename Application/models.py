@@ -1,7 +1,7 @@
 #from datetime import datetime
 from django.db import models
 from django.utils import timezone
-from Aerospike.aerospike import delete_value_on_cache
+from Aerospike.aerospike import AerospikeCacheControl
 
 def expensive_calculation():
     return timezone.now()
@@ -12,5 +12,5 @@ class Poll(models.Model):
     pub_date = models.DateTimeField('date published', default=expensive_calculation)
     
     def save(self):
-        delete_value_on_cache(self.pk)
+        AerospikeCacheControl(self.pk).delete_value_on_cache()
         return super().save()
