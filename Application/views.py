@@ -28,7 +28,7 @@ class home(generics.ListAPIView):
 
     def create_cache(self):
         acc = AerospikeCacheControl("home")
-        instances = list(Poll.objects.all().values())
+        instances = list(Poll.objects.filter(active = True).values())
         data = {"offers": instances}
         acc.save_in_cache(data)
         print("Nao acessei a cache")

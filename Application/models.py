@@ -10,10 +10,12 @@ class Poll(models.Model):
     question = models.CharField(max_length=200)
     answer = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published', default=expensive_calculation)
+    active = models.BooleanField(default=True)
     
     def save(self):
-        keys_to_clear = [self.pk, "home"]
-        acc = AerospikeCacheControl()
-        keys_to_clear = acc.generate_multiples_keys(keys_to_clear)
-        print(acc.delete_array_value_on_cache(keys_to_clear))
+        if self.active:
+            keys_to_clear = [self.pk, "home"]
+            acc = AerospikeCacheControl()
+            keys_to_clear = acc.generate_multiples_keys(keys_to_clear)
+            acc.delete_array_value_on_cache(keys_to_clear)
         return super().save()
