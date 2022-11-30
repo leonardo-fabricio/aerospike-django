@@ -2,6 +2,12 @@ from django.http import HttpResponse, JsonResponse
 from Aerospike.aerospike import *
 from .models import *
 from .serializer import *
+from rest_framework import generics, serializers
+
+class PollSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Poll
+        fields = ('__all__')
 
 
 def detail(request, pk):
@@ -17,5 +23,19 @@ def detail(request, pk):
     print("Não acessei a cache")
     return JsonResponse(product)
 
-def home(request):
-    return JsonResponse({})
+class home(generics.ListAPIView):
+    serializer_class = PollSerializer
+
+    def create_cache(self):
+        acc = AerospikeCacheControl("home")
+        instances = list(Poll.objects.all().values())
+        data = {"offers": instances}
+        acc.save_in_cache(data)
+        print("Nao acessei a cache")
+        return instances
+    
+    def get_queryset(self):
+        acc = AerospikeCacheControl("home")
+        product = acc.get_value_on_cache()
+        return product["offers"] if product != None else self.create_cache()
+        

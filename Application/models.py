@@ -12,5 +12,8 @@ class Poll(models.Model):
     pub_date = models.DateTimeField('date published', default=expensive_calculation)
     
     def save(self):
-        AerospikeCacheControl(self.pk).delete_value_on_cache()
+        keys_to_clear = [self.pk, "home"]
+        acc = AerospikeCacheControl()
+        keys_to_clear = acc.generate_multiples_keys(keys_to_clear)
+        print(acc.delete_array_value_on_cache(keys_to_clear))
         return super().save()

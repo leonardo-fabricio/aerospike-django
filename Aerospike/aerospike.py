@@ -1,8 +1,9 @@
 import aerospike
 class AerospikeCacheControl():
-      def __init__(self, offer):
-            self.VALUE_DEFAULT_KEY = 'id_{}'.format(offer)
-            self.KEY_AEROSPIKE = ('test', 'demo', offer)
+      def __init__(self, offer = None):
+            self.KEY_DEFAULT = 'id_'
+            self.VALUE_DEFAULT_KEY = '{}{}'.format(self.KEY_DEFAULT,offer)
+            self.KEY_AEROSPIKE = ('test', 'demo', self.VALUE_DEFAULT_KEY)
             self.PORT = 3000
             self.OFFER = offer
 
@@ -46,5 +47,22 @@ class AerospikeCacheControl():
                   client.put(self.KEY_AEROSPIKE, product, policy=policy)
             except:
                   print("occurring error")
+      
+      def delete_array_value_on_cache(self, array):
+            client = self.connect_client()
+            remove_policy = {'durable_delete': True}
+            for item in array:
+                  try:
+                        client.remove(item, policy=remove_policy)
+                        client.close()
+                  except:
+                        print("occurring error")
+
+            return "clear cache for keys: {}".format(array)
+
+      def generate_multiples_keys(self, array):
+            for item in range(len(array)): 
+                  array[item] = ('test', 'demo', f"{self.KEY_DEFAULT}{array[item]}")
+            return array
 
             
